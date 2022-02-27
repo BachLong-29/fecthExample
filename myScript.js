@@ -1,5 +1,6 @@
 var Api = 'http://localhost:3000/courses/'
 var idForEdit = 0
+var btnAccept = document.querySelector('#btn-accept')
 
 
 function start(){
@@ -7,8 +8,8 @@ function start(){
     handleCreateCourses()    
 }
 
+// Render Course Interface
 function renderCoures(courses){   
-    // console.log(courses) 
     var listCoursesBlock = document.querySelector('#list-courses ul')
     var htmls = courses.map(function(course){
         return `
@@ -22,57 +23,68 @@ function renderCoures(courses){
     })
     listCoursesBlock.innerHTML = htmls.join('')    
 }
-
-var editCourse = function(id, name, description){
-    document.querySelector('input[name="name"]').value = name
-    document.querySelector('input[name="description"]').value = description
-    idForEdit = id
-}
-
-var btnAccept = document.querySelector('#btn-accept')
-btnAccept.onclick = function(){ 
-    var editInfo = {    
-        id: idForEdit,    
-        name: document.querySelector('input[name="name"]').value,
-        description: document.querySelector('input[name="description"]').value
-    }     
-    handleEditCourse(editInfo)
-}
-
-function handleEditCourse(data){  
-      fetch(Api + data.id,{
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-          },
-        body: JSON.stringify(data)
+// Using fetch to get json from API
+function getCourese(callback){
+    fetch(Api)
+    .then(function(response){
+        return response.json()
     })
-        .then(response => response.json())
-        .then(function(){
-            var idCourse = document.querySelector('.course-'+data.id)
-            var h4Element = idCourse.querySelector('h4')
-            var pElement = idCourse.querySelector('p')
-            h4Element.innerHTML = data.name
-            pElement.innerHTML = data.description  
-        })  
+    .then(callback)
 }
 
+// Using fetch to add a course 
+function createCoure(data, callback){
+    fetch(Api,{
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'            
+        },
+    })
+    .then(function(response){        
+        return response.json()
+    })
+    .then(callback)
+}
+
+
+
+// Handle Delete Course using fetch
 function delCoures(id){
     fetch(Api + id,{
         method: 'DELETE'
     })
-        .then(function(response){
-            return response.json()
-        })
-        .then(function(){
+    .then(function(response){
+        return response.json()
+    })
+    .then(function(){
             var idCourse = document.querySelector('.course-'+id)
             if(idCourse){
                 idCourse.remove()
             }
-        })    
-
+    })    
+}
+    
+    // Handle Edit Course using fetch
+function handleEditCourse(data){  
+    fetch(Api + data.id,{
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(function(){
+        var idCourse = document.querySelector('.course-'+data.id)
+        var h4Element = idCourse.querySelector('h4')
+        var pElement = idCourse.querySelector('p')
+        h4Element.innerHTML = data.name
+        pElement.innerHTML = data.description  
+    })  
 }
 
+// Handle onclick button Create and call createCourse then renderCourse
 function handleCreateCourses(){
     var btnCreate = document.querySelector("#btn-create")
     btnCreate.onclick = function(){
@@ -87,30 +99,21 @@ function handleCreateCourses(){
     }
 }
 
+// Listen onclick Edit button event
+var editCourse = function(id, name, description){
+    document.querySelector('input[name="name"]').value = name
+    document.querySelector('input[name="description"]').value = description
+    idForEdit = id
+}
+
+// Accept to Change
+btnAccept.onclick = function(){ 
+    var editInfo = {    
+        id: idForEdit,    
+        name: document.querySelector('input[name="name"]').value,
+        description: document.querySelector('input[name="description"]').value
+    }     
+    handleEditCourse(editInfo)
+}
+
 start()
-
-function getCourese(callback){
-    fetch(Api)
-        .then(function(response){
-            return response.json()
-        })
-        .then(callback)
-}
-function createCoure(data, callback){
-    fetch(Api,{
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-            'Content-Type': 'application/json'            
-        },
-    })
-        .then(function(response){
-            return response.json()
-        })
-        .then(callback)
-}
-
-
-// coi lai call back + promise
-
-
